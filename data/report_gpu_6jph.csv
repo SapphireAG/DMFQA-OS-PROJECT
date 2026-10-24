@@ -1,0 +1,6 @@
+policy,rate,short_mean_jct_h,long_p95_jct_h,longest_wait_long_h,preemptions
+FCFS,6,10.2,43.0,24.3,0
+MLFQ,6,1.9,51.6,5.7,786
+Dynamic MLFQ,6,1.8,50.5,9.0,635
+Aging MLFQ,6,1.8,53.0,2.3,1093
+DMFQ-A,6,1.9,54.3,2.7,1282
