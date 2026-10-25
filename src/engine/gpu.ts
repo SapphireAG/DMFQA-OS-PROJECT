@@ -254,3 +254,65 @@ function summarizeGPU(
     makespan: last / 60,
   };
 }
+
+/** Per-frame live meters for the GPU page; the last frame equals the run summary. */
+export interface GPUMeters {
+  shortJCT: Float64Array; // h, mean over short jobs finished so far
+  longWait: Float64Array; // h, longest wait of a long job so far (incl. ongoing waits)
+  preemptions: Int32Array;
+  util: Float64Array; // 0..1 since first arrival
+}
+
+export function gpuMeters(cfg: GPUConfig, run: GPURun): GPUMeters {
+  const frames = run.frames ?? [];
+  const jobs = run.jobs;
+  const F = frames.length;
+  const m: GPUMeters = {
+    shortJCT: new Float64Array(F),
+    longWait: new Float64Array(F),
+    preemptions: new Int32Array(F),
+    util: new Float64Array(F),
+  };
+  const isLong = (j: number) => jobs[j].gpus * jobs[j].duration > cfg.longCutoff;
+  const waitStart = new Float64Array(jobs.length);
+  const waitingLong = new Set<number>();
+  const first = jobs.length ? jobs[0].arrival : 0;
+  let sum = 0;
+  let cnt = 0;
+  let maxWait = 0;
+  let pre = 0;
+  let busy = 0;
+  for (let f = 0; f < F; f++) {
+    const fr = frames[f];
+    const s = fr.t - 1; // step start
+    for (let k = 0; k < fr.ev.length; k += 3) {
+      const code = fr.ev[k];
+      const j = fr.ev[k + 1];
+      if (code === EV.arrive) {
+        waitStart[j] = jobs[j].arrival;
+        if (isLong(j)) waitingLong.add(j);
+      } else if (code === EV.preempt) {
+        pre++;
+        waitStart[j] = s;
+        if (isLong(j)) waitingLong.add(j);
+      } else if (code === EV_START) {
+        if (isLong(j)) maxWait = Math.max(maxWait, s - waitStart[j]);
+        waitingLong.delete(j);
+      } else if (code === EV.finish) {
+        busy += jobs[j].gpus;
+        if (!isLong(j)) {
+          sum += fr.t - jobs[j].arrival;
+          cnt++;
+        }
+      }
+    }
+    for (const j of fr.grid) if (j >= 0) busy++;
+    let ongoing = maxWait;
+    for (const j of waitingLong) ongoing = Math.max(ongoing, s - waitStart[j]);
+    m.shortJCT[f] = cnt ? sum / cnt / 60 : NaN;
+    m.longWait[f] = ongoing / 60;
+    m.preemptions[f] = pre;
+    m.util[f] = busy / (cfg.gpus * (fr.t - first));
+  }
+  return m;
+}

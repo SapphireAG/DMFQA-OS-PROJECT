@@ -228,7 +228,7 @@ export function ResultsExplorer({
         <h2 id="llm-h" className="mt-2 text-[30px] md:text-h2">
           At {rateL.toFixed(1)} req/s
         </h2>
-        <div className="mt-10 grid gap-16 lg:grid-cols-2">
+        <div className="mt-10 grid gap-16 lg:grid-cols-2 [&>*]:min-w-0">
           <div id="llm-ttft" className="scroll-mt-48">
             <Figure n={1} caption="Short requests (≤ 512 output tokens), p99 time to first token. Lower is better." source={srcLine}>
               <BarChart
@@ -307,7 +307,7 @@ export function ResultsExplorer({
         <h2 id="gpu-h" className="mt-2 text-[30px] md:text-h2">
           At {rateG} jobs/h
         </h2>
-        <div className="mt-10 grid gap-16 lg:grid-cols-3">
+        <div className="mt-10 grid gap-16 lg:grid-cols-3 [&>*]:min-w-0">
           <Figure n={6} caption="Mean job completion time of short jobs (≤ 960 GPU-minutes)." source={srcLine}>
             <BarChart
               title={`Strict FIFO lets one gang job block the rest: short-job JCT ${hours(G('FCFS').shortJCT)} vs ${hours(G('DMFQ-A').shortJCT)}`}

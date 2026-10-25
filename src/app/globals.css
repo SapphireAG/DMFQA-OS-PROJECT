@@ -147,3 +147,8 @@
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+.chip {
+  transition: transform 220ms ease-out;
+  will-change: transform;
+}

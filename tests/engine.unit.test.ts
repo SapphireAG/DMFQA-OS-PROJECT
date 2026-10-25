@@ -3,7 +3,7 @@ import { dynQuantum, quantumFor } from '@/engine/quantum';
 import { makeRng } from '@/engine/rng';
 import { percentile } from '@/engine/metrics';
 import { DEFAULT_LLM, genLLMWorkload, llmMeters, simulateLLM } from '@/engine/llm';
-import { DEFAULT_GPU, genGPUWorkload, simulateGPU } from '@/engine/gpu';
+import { DEFAULT_GPU, genGPUWorkload, gpuMeters, simulateGPU } from '@/engine/gpu';
 import { CPU_PRESETS, DEFAULT_CPU, simulateCPU } from '@/engine/cpu';
 import { CPU_POLICIES, POLICIES, type LLMRequest } from '@/engine/types';
 
@@ -141,6 +141,19 @@ describe('GPU engine rules', () => {
       const count = new Map<number, number>();
       for (const j of f.grid) if (j >= 0) count.set(j, (count.get(j) ?? 0) + 1);
       for (const [j, c] of count) expect(c).toBe(w[j].gpus);
+    }
+  });
+
+  it('live meters at the last frame equal the summary', () => {
+    const w = genGPUWorkload(DEFAULT_GPU, { rate: 6, n: 200, seed: 23 });
+    for (const p of POLICIES) {
+      const run = simulateGPU(DEFAULT_GPU, p, w, { trace: true });
+      const m = gpuMeters(DEFAULT_GPU, run);
+      const L = run.frames!.length - 1;
+      expect(m.shortJCT[L]).toBeCloseTo(run.summary.shortMeanJCT, 9);
+      expect(m.longWait[L]).toBeCloseTo(run.summary.longestWaitLong, 9);
+      expect(m.preemptions[L]).toBe(run.summary.preemptions);
+      expect(m.util[L]).toBeCloseTo(run.summary.utilisation, 9);
     }
   });
 

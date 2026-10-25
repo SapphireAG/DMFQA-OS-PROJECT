@@ -1,6 +1,6 @@
 /** Engine API exposed to the UI through a comlink Web Worker (CLAUDE.md §5.3). */
 import { genLLMWorkload, llmMeters, mergeRequests, simulateLLM, type LLMMeters } from './llm';
-import { genGPUWorkload, simulateGPU } from './gpu';
+import { genGPUWorkload, gpuMeters, simulateGPU, type GPUMeters } from './gpu';
 import { simulateCPU } from './cpu';
 import type {
   CPUConfig,
@@ -38,6 +38,7 @@ export interface GPURunResult {
   summary: GPUSummary;
   jobs: GPUJob[];
   frames?: GPUFrame[];
+  meters?: GPUMeters;
 }
 
 export interface LLMSweepRow extends LLMSummary {
@@ -72,7 +73,20 @@ export const api = {
     opts: { rate: number; n: number; seed: number; trace?: boolean },
   ): GPURunResult {
     const run = simulateGPU(cfg, policy, genGPUWorkload(cfg, opts), { trace: opts.trace });
-    return { summary: run.summary, jobs: run.jobs, frames: run.frames };
+    return {
+      summary: run.summary,
+      jobs: run.jobs,
+      frames: run.frames,
+      meters: opts.trace ? gpuMeters(cfg, run) : undefined,
+    };
+  },
+
+  runGPUMany(
+    cfg: GPUConfig,
+    policies: Policy[],
+    opts: { rate: number; n: number; seed: number; trace?: boolean },
+  ): GPURunResult[] {
+    return policies.map((p) => api.runGPU(cfg, p, opts));
   },
 
   runCPU(cfg: CPUConfig, policy: Policy, procs: CPUProcess[]): CPURun {

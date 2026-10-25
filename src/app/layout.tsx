@@ -25,7 +25,6 @@ export const metadata: Metadata = {
   description:
     'Dynamic Multilevel Feedback Queue scheduling with Aging: a tunable scheduling layer for CPUs, LLM inference serving and GPU clusters. Live, in-browser simulations on synthetic workloads.',
   icons: { icon: '/favicon.svg' },
-  openGraph: { images: ['/og-image.png'] },
 };
 
 export const viewport: Viewport = {

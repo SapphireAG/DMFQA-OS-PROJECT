@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 
-export function useWidth<T extends HTMLElement>(initial = 640) {
+export function useWidth<T extends HTMLElement>(initial = 320) {
   const ref = useRef<T>(null);
   const [w, setW] = useState(initial);
   useEffect(() => {

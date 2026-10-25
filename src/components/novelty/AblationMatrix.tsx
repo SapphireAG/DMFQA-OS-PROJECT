@@ -31,7 +31,7 @@ export function AblationMatrix({
   return (
     <div>
       <p className="kicker text-stone">{title}</p>
-      <div className="mt-3 grid grid-cols-[88px_1fr_56px_1fr] items-stretch text-[14px] md:grid-cols-[120px_1fr_72px_1fr]">
+      <div className="mt-3 grid grid-cols-[64px_minmax(0,1fr)_44px_minmax(0,1fr)] items-stretch text-[14px] md:grid-cols-[120px_minmax(0,1fr)_72px_minmax(0,1fr)]">
         <div />
         <div className="kicker pb-2 text-[11px] text-stone">Fixed quanta</div>
         <div />
@@ -63,14 +63,14 @@ function CellBox({ c, unit, metric }: { c: Cell; unit: string; metric: string })
   const st = POLICY_STYLE[c.policy];
   const hero = c.policy === 'DMFQ-A';
   return (
-    <div className={`border-t border-hairline py-3 pr-2 ${hero ? 'bg-paper-2' : ''}`}>
-      <p className="flex items-center gap-1.5 text-[13px] text-ink-2">
+    <div className={`min-w-0 border-t border-hairline py-3 pr-2 ${hero ? 'bg-paper-2' : ''}`}>
+      <p className="flex items-center gap-1.5 truncate text-[12px] text-ink-2 md:text-[13px]">
         <MarkerSwatch shape={st.marker} color={st.color} />
         <span className={hero ? 'font-semibold text-ink' : ''}>{c.policy}</span>
       </p>
-      <p className="mt-1 font-display text-[26px] font-semibold leading-none tabular-nums text-ink md:text-[30px]">
+      <p className="mt-1 font-display text-[22px] font-semibold leading-none tabular-nums text-ink md:text-[30px]">
         {fmt(c.value, 0)}
-        <span className="num ml-1 text-[12px] font-normal text-stone">{unit}</span>
+        <span className="num ml-1 block text-[11px] font-normal text-stone md:inline md:text-[12px]">{unit}</span>
       </p>
       <p className="mt-1 text-[12px] text-stone">
         {metric}
